@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     @fonts
-    @vite('resources/js/app.js')
+    @vite('resources/js/app.ts')
     <x-inertia::head>
         <title>{{ config('app.name') }}</title>
     </x-inertia::head>
