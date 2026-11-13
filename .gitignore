@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+.env.testing
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -28,3 +29,4 @@ Thumbs.db
 npm-debug.log
 yarn-error.log
 /.fleet
+/bootstrap/ssr
