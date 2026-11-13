@@ -54,7 +54,7 @@ final class AuthenticationTest extends TestCase
 
         $this->withCookie(config('session.cookie'), session()->getId());
         Auth::forgetGuards();
-        $this->get(route('home'))->assertInertia(
+        $this->get(route('communities.index'))->assertInertia(
             fn (Assert $page) => $page->where('auth.user.id', $user->id),
         );
     }
@@ -235,7 +235,8 @@ final class AuthenticationTest extends TestCase
         Auth::forgetGuards();
         $this->post(route('logout'))
             ->assertRedirectToRoute('login');
-        $this->get(route('home'))
+        $this->get(route('home'))->assertRedirectToRoute('login');
+        $this->get(route('login'))
             ->assertInertia(fn (Assert $page) => $page->where('auth.user', null));
     }
 

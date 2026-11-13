@@ -13,11 +13,27 @@ export interface CurrentCommunity {
     role: 'resident' | 'manager';
 }
 
+export interface CommunityListItem extends CurrentCommunity {
+    description: string | null;
+    dashboardUrl: string;
+}
+
+export interface CommunityMember extends User {
+    role: CurrentCommunity['role'];
+}
+
 export interface SharedProps {
     appName: string;
     auth: { user: User | null };
     community: CurrentCommunity | null;
-    urls: { login: string; loginStore: string; logout: string };
+    urls: {
+        login: string;
+        loginStore: string;
+        logout: string;
+        communities: string;
+        dashboard: string | null;
+        members: string | null;
+    };
 }
 
 declare module '@inertiajs/core' {
