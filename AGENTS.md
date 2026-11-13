@@ -1,3 +1,66 @@
+# Local project workflow
+
+- Run all project commands through the local wrapper: `./x artisan ...`, `./x composer ...`, `./x npm ...`, `./x run ...`.
+- Do not call raw `php artisan`, `composer`, or `npm` directly unless the user explicitly asks for it; the wrapper keeps the correct local environment and container setup.
+- Use `./x up -b` to initialize the stack and `./x down` to stop it. Use `./x artisan boost:mcp` for the Laravel Boost MCP server.
+- Keep agent-specific skills and config in the repo-local folder `.agents/`.
+- Follow the existing Laravel Boost rules below and prefer the smallest relevant validation command for the task.
+
+## Stack
+
+PHP 8.4
+Laravel 13
+PostgreSQL
+Redis
+REST API
+InertiaJS Vue3 - SPA, SSR
+PHPUnit
+
+## Architecture
+
+Module architecture
+Controllers should be thin.
+Business logic lives in services/actions.
+Existing project patterns should be preferred over introducing new abstractions.
+Do not add dependencies unless required.
+
+## Database
+
+PostgreSQL is used.
+Existing migrations/schema conventions must be preserved.
+Be careful with backward compatibility of production data.
+
+## Coding rules
+
+Follow existing code style and naming.
+Before creating a new class, search for an existing implementation/pattern.
+Prefer modifying existing implementation over duplicating logic.
+Do not refactor unrelated code.
+Make classes read-only and final, provided this does not conflict with the application logic.
+Use strict typing.
+In PHPDoc, specify only what is not reflected in the interface (exceptions, complex variable types, etc.).
+Separate string concatenation operators with spaces wherever possible.
+Use Dependency Injection wherever possible.
+
+## Validation
+
+After changes:
+
+1. Run relevant tests.
+2. Run formatter/static analysis if configured.
+3. Report:
+    - files changed
+    - tests executed
+    - assumptions made
+
+# Before implementation inspect:
+
+git status
+git diff
+git log --oneline -20
+
+If task-related changes already exist, inspect them before searching broadly.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
