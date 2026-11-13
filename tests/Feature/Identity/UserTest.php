@@ -37,13 +37,13 @@ final class UserTest extends TestCase
         $this->assertArrayNotHasKey('remember_token', $storedUser->toArray());
     }
 
-    public function test_existing_seeder_creates_the_user_after_the_namespace_change(): void
+    public function test_demo_seeder_creates_users_in_the_identity_module(): void
     {
         $this->seed(DatabaseSeeder::class);
 
         $this->assertDatabaseHas(
             'users',
-            ['name' => 'Test User', 'email' => 'test@example.com'],
+            ['name' => 'Управляющий Соснового', 'email' => 'manager1@example.test'],
         );
     }
 }

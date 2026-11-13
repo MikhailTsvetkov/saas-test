@@ -64,9 +64,11 @@ final class CommunityDashboardTest extends TestCase
         ))->assertRedirectToRoute('login');
     }
 
-    public function test_foreign_and_unknown_communities_return_404(): void
+    #[TestWith([CommunityRole::Resident])]
+    #[TestWith([CommunityRole::Manager])]
+    public function test_foreign_and_unknown_communities_return_404(CommunityRole $role): void
     {
-        $member = CommunityMember::factory()->manager()->create();
+        $member = CommunityMember::factory()->create(['role' => $role]);
         $other = CommunityMember::factory()->create();
 
         $this->actingAs($member->user)
