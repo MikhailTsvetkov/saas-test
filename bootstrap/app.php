@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Modules\Communities\Http\Middleware\ResolveCommunity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,6 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn (): string => route('login'));
         $middleware->redirectUsersTo(fn (): string => route('home'));
+
+        $middleware->alias(['community' => ResolveCommunity::class]);
+        $middleware->appendToPriorityList(
+            SubstituteBindings::class,
+            ResolveCommunity::class,
+        );
 
         $middleware->web(append: [
             HandleInertiaRequests::class,

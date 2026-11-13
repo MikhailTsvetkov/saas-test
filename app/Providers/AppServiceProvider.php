@@ -4,17 +4,28 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Modules\Communities\CurrentCommunity;
+use App\Modules\Communities\Models\Community;
+use App\Modules\Communities\Policies\CommunityPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 
 final class AppServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->scoped(CurrentCommunity::class);
+    }
+
     public function boot(): void
     {
+        Gate::policy(Community::class, CommunityPolicy::class);
+
         RateLimiter::for('login', function (Request $request): Limit {
             $email = $request->input('email');
             $key = (is_string($email) ? Str::lower($email) : '') . '|' . $request->ip();
