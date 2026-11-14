@@ -25,6 +25,7 @@ const logout = useForm({});
                 </div>
             </div>
             <nav aria-label="Основная навигация" class="mx-auto flex max-w-6xl flex-wrap gap-2 px-4 pb-4 sm:px-6">
+                <Link v-if="page.props.urls.requests" :href="page.props.urls.requests" :aria-current="page.component.startsWith('Requests/') ? 'page' : undefined" class="rounded-lg px-3 py-3 text-sm font-medium hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-emerald-600 aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800 dark:hover:bg-stone-800 dark:aria-[current=page]:bg-emerald-950 dark:aria-[current=page]:text-emerald-300">Обращения</Link>
                 <Link :href="page.props.urls.communities" :aria-current="page.component === 'Communities/Index' ? 'page' : undefined" class="rounded-lg px-3 py-3 text-sm font-medium hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-emerald-600 aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800 dark:hover:bg-stone-800 dark:aria-[current=page]:bg-emerald-950 dark:aria-[current=page]:text-emerald-300">Все сообщества</Link>
                 <Link v-if="page.props.urls.dashboard" :href="page.props.urls.dashboard" :aria-current="page.component === 'Communities/Dashboard' ? 'page' : undefined" class="rounded-lg px-3 py-3 text-sm font-medium hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-emerald-600 aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800 dark:hover:bg-stone-800 dark:aria-[current=page]:bg-emerald-950 dark:aria-[current=page]:text-emerald-300">Обзор</Link>
                 <Link v-if="page.props.urls.members" :href="page.props.urls.members" :aria-current="page.component === 'Communities/Members' ? 'page' : undefined" class="rounded-lg px-3 py-3 text-sm font-medium hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-emerald-600 aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800 dark:hover:bg-stone-800 dark:aria-[current=page]:bg-emerald-950 dark:aria-[current=page]:text-emerald-300">Участники</Link>
@@ -32,6 +33,7 @@ const logout = useForm({});
         </header>
 
         <main id="main-content" tabindex="-1" class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+            <p v-if="page.flash.success" role="status" class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">{{ page.flash.success }}</p>
             <slot />
         </main>
     </div>

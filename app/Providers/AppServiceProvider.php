@@ -7,6 +7,8 @@ namespace App\Providers;
 use App\Modules\Communities\CurrentCommunity;
 use App\Modules\Communities\Models\Community;
 use App\Modules\Communities\Policies\CommunityPolicy;
+use App\Modules\Requests\Models\ServiceRequest;
+use App\Modules\Requests\Policies\ServiceRequestPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +27,7 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Community::class, CommunityPolicy::class);
+        Gate::policy(ServiceRequest::class, ServiceRequestPolicy::class);
 
         RateLimiter::for('login', function (Request $request): Limit {
             $email = $request->input('email');

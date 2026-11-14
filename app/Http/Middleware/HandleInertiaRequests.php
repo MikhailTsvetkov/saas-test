@@ -39,6 +39,11 @@ final class HandleInertiaRequests extends Middleware
                 'loginStore' => $this->urls->route('login.store'),
                 'logout' => $this->urls->route('logout'),
                 'communities' => $this->urls->route('communities.index'),
+                'requests' => $this->currentCommunity->isSet()
+                    ? $this->urls->route('communities.requests.index', [
+                        'community' => $this->currentCommunity->community()->slug,
+                    ])
+                    : null,
                 'dashboard' => $this->currentCommunity->isSet()
                     ? $this->urls->route(
                         'communities.dashboard',

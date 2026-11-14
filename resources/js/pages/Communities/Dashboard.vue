@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '../../layouts/AuthenticatedLayout.vue';
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -21,9 +21,9 @@ const page = usePage();
                 <p class="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-400">{{ page.props.community?.role === 'manager' ? 'В разделе «Участники» доступен список жителей и управляющих.' : 'Здесь будет собрана информация о жизни вашего сообщества.' }}</p>
             </section>
             <section class="rounded-2xl border border-dashed border-stone-300 p-6 dark:border-stone-700" aria-labelledby="requests-title">
-                <span class="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">Скоро</span>
                 <h2 id="requests-title" class="mt-2 text-xl font-semibold">Обращения</h2>
-                <p class="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-400">Здесь можно будет создавать обращения и следить за их решением. Раздел находится в разработке.</p>
+                <p class="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-400">{{ page.props.community?.role === 'manager' ? 'Просматривайте обращения жителей вашего сообщества.' : 'Сообщайте о проблемах и следите за состоянием своих обращений.' }}</p>
+                <Link v-if="page.props.urls.requests" :href="page.props.urls.requests" class="mt-4 inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">Открыть обращения</Link>
             </section>
         </div>
     </section>
