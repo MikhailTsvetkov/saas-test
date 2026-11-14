@@ -42,13 +42,8 @@ WSL2 с интеграцией Docker Desktop. PHP, Composer и Node.js рабо
 1. При первом запуске подготовьте `.env`, если его ещё нет:
 
    ```bash
-   (umask 077; cp _dev/.env.example.development .env)
+   (umask 077; cp .env.example .env)
    ```
-
-   Wrapper сам создаёт этот файл из того же шаблона, если он отсутствует.
-   Корневая `.env.example` также согласована с Docker: PostgreSQL на
-   `postgres:5432`, Redis на `redis:6379`, клиент `predis`. Для первого запуска
-   рекомендуется шаблон `_dev/.env.example.development`.
 
 2. Поднимите сервисы и установите зависимости из проекта:
 
