@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 final readonly class ServiceRequestData
 {
     /**
+     * @param  list<RequestStatus>  $allowedStatuses
      * @param  list<RequestStatusHistoryData>  $statusHistories
      * @param  list<RequestMessageData>  $messages
      */
@@ -22,6 +23,7 @@ final readonly class ServiceRequestData
         public CarbonImmutable $createdAt,
         public CarbonImmutable $updatedAt,
         public ?CarbonImmutable $resolvedAt,
+        public array $allowedStatuses,
         public array $statusHistories,
         public array $messages = [],
     ) {}
@@ -31,6 +33,7 @@ final readonly class ServiceRequestData
      *     id: int, title: string, description: string, status: string,
      *     author: array{id: int, name: string},
      *     created_at: string, updated_at: string, resolved_at: ?string,
+     *     allowed_statuses: list<string>,
      *     statusHistories: list<array{id: int, from_status: ?string, to_status: string, author: ?array{id: int, name: string}, created_at: string}>,
      *     messages?: list<array{id: int, body: string, author: array{id: int, name: string}, role: ?string, created_at: string}>
      * }
@@ -46,6 +49,10 @@ final readonly class ServiceRequestData
             'created_at' => $this->createdAt->toISOString(),
             'updated_at' => $this->updatedAt->toISOString(),
             'resolved_at' => $this->resolvedAt?->toISOString(),
+            'allowed_statuses' => array_map(
+                static fn (RequestStatus $status): string => $status->value,
+                $this->allowedStatuses,
+            ),
             'statusHistories' => array_map(
                 fn (RequestStatusHistoryData $history): array => $history->toArray(),
                 $this->statusHistories,

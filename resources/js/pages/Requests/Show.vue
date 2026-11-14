@@ -6,10 +6,12 @@ import type { ServiceRequest } from '../../types';
 import { formatRequestDate, requestStatuses } from './presentation';
 
 defineOptions({ layout: AuthenticatedLayout });
-const props = defineProps<{ serviceRequest: ServiceRequest; messageStoreUrl?: string }>();
+const props = defineProps<{ serviceRequest: ServiceRequest; messageStoreUrl?: string; statusUpdateUrl?: string }>();
 const page = usePage();
 const form = useForm({ body: '' });
+const statusForm = useForm({ status: '' as string });
 const messages = computed(() => props.serviceRequest.messages ?? []);
+const availableStatusTransitions = computed(() => props.serviceRequest.allowed_statuses ?? []);
 
 function submitMessage(): void {
     if (!props.messageStoreUrl) {
@@ -19,6 +21,17 @@ function submitMessage(): void {
     form.post(props.messageStoreUrl, {
         preserveScroll: true,
         onSuccess: () => form.reset('body'),
+    });
+}
+
+function submitStatusChange(): void {
+    if (!props.statusUpdateUrl || !statusForm.status) {
+        return;
+    }
+
+    statusForm.patch(props.statusUpdateUrl, {
+        preserveScroll: true,
+        onSuccess: () => statusForm.reset('status'),
     });
 }
 </script>
@@ -48,6 +61,22 @@ function submitMessage(): void {
                 <p v-if="form.errors.body" class="text-sm text-red-700 dark:text-red-400">{{ form.errors.body }}</p>
                 <button type="submit" :disabled="form.processing" class="min-h-11 self-start rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-wait disabled:opacity-60">
                     {{ form.processing ? 'Отправляем...' : 'Добавить комментарий' }}
+                </button>
+            </form>
+        </section>
+
+        <section v-if="statusUpdateUrl && availableStatusTransitions.length > 0" aria-labelledby="status-change-title" class="rounded-2xl border border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-900">
+            <h2 id="status-change-title" class="text-xl font-semibold">Изменить статус</h2>
+            <form @submit.prevent="submitStatusChange" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                <label class="flex flex-1 flex-col gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+                    <span>Следующий статус</span>
+                    <select v-model="statusForm.status" name="status" class="min-h-11 rounded-lg border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900 px-3 py-2.5 text-stone-900 shadow-sm transition focus:outline-2 focus:outline-emerald-600 dark:border-stone-700 dark:text-stone-100">
+                        <option value="" disabled selected>Выберите статус</option>
+                        <option v-for="status in availableStatusTransitions" :key="status" :value="status">{{ requestStatuses[status].label }}</option>
+                    </select>
+                </label>
+                <button type="submit" :disabled="statusForm.processing || !statusForm.status" class="min-h-11 rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:cursor-wait disabled:opacity-60">
+                    {{ statusForm.processing ? 'Сохраняем...' : 'Обновить статус' }}
                 </button>
             </form>
         </section>

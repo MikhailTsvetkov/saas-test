@@ -97,6 +97,7 @@ export interface ServiceRequest {
     created_at: string;
     updated_at: string;
     resolved_at: string | null;
+    allowed_statuses: RequestStatus[];
     statusHistories: RequestStatusHistory[];
     messages?: RequestMessage[];
 }

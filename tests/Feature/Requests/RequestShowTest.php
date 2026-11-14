@@ -58,6 +58,7 @@ final class RequestShowTest extends TestCase
                 'title' => $serviceRequest->title,
                 'description' => $serviceRequest->description,
                 'status' => 'resolved',
+                'allowed_statuses' => $role === 'manager' ? ['in_progress'] : [],
                 'author' => $author,
                 'created_at' => now()->toISOString(),
                 'updated_at' => now()->toISOString(),

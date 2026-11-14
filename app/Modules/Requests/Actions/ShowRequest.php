@@ -38,6 +38,10 @@ final readonly class ShowRequest
             ->get()
             ->mapWithKeys(fn (CommunityMember $member): array => [$member->user_id => $member->role]);
 
+        $allowedStatuses = $this->gate->forUser($user)->allows('changeStatus', $serviceRequest)
+            ? $serviceRequest->status->allowedNextStatuses()
+            : [];
+
         return new ServiceRequestData(
             id: $serviceRequest->id,
             title: $serviceRequest->title,
@@ -47,6 +51,7 @@ final readonly class ShowRequest
             createdAt: $serviceRequest->created_at->toImmutable(),
             updatedAt: $serviceRequest->updated_at->toImmutable(),
             resolvedAt: $serviceRequest->resolved_at?->toImmutable(),
+            allowedStatuses: $allowedStatuses,
             statusHistories: $histories->map(fn (
                 RequestStatusHistory $history,
             ): RequestStatusHistoryData => new RequestStatusHistoryData(

@@ -106,10 +106,18 @@ final class RequestController extends Controller
             ])
             :
             null;
+        $statusUpdateUrl = $gate->allows('changeStatus', $requestModel)
+            ? $urls->route('communities.requests.status.update', [
+                'community' => $community->slug,
+                'request' => $requestModel->id,
+            ])
+            :
+            null;
 
         return $inertia->render('Requests/Show', [
             'serviceRequest' => fn (): array => $serviceRequest->toArray(),
             'messageStoreUrl' => $inertia->always($messageStoreUrl),
+            'statusUpdateUrl' => $inertia->always($statusUpdateUrl),
         ]);
     }
 }
