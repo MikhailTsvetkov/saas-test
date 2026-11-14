@@ -7,6 +7,7 @@ use App\Modules\Communities\Http\Controllers\CommunityDashboardController;
 use App\Modules\Communities\Http\Controllers\CommunityMemberController;
 use App\Modules\Identity\Http\Controllers\AuthenticatedSessionController;
 use App\Modules\Requests\Http\Controllers\RequestController;
+use App\Modules\Requests\Http\Controllers\RequestMessageController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,8 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/requests', [RequestController::class, 'index'])->name('communities.requests.index');
         Route::get('/requests/create', [RequestController::class, 'create'])->name('communities.requests.create');
         Route::post('/requests', [RequestController::class, 'store'])->name('communities.requests.store');
+        Route::post('/requests/{request}/messages', [RequestMessageController::class, 'store'])
+            ->whereNumber('request')->name('communities.requests.messages.store');
         Route::get('/requests/{request}', [RequestController::class, 'show'])
             ->whereNumber('request')->name('communities.requests.show');
     });

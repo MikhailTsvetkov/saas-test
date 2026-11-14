@@ -9,7 +9,10 @@ use Carbon\CarbonImmutable;
 
 final readonly class ServiceRequestData
 {
-    /** @param list<RequestStatusHistoryData> $statusHistories */
+    /**
+     * @param  list<RequestStatusHistoryData>  $statusHistories
+     * @param  list<RequestMessageData>  $messages
+     */
     public function __construct(
         public int $id,
         public string $title,
@@ -20,6 +23,7 @@ final readonly class ServiceRequestData
         public CarbonImmutable $updatedAt,
         public ?CarbonImmutable $resolvedAt,
         public array $statusHistories,
+        public array $messages = [],
     ) {}
 
     /**
@@ -27,12 +31,13 @@ final readonly class ServiceRequestData
      *     id: int, title: string, description: string, status: string,
      *     author: array{id: int, name: string},
      *     created_at: string, updated_at: string, resolved_at: ?string,
-     *     statusHistories: list<array{id: int, from_status: ?string, to_status: string, author: ?array{id: int, name: string}, created_at: string}>
+     *     statusHistories: list<array{id: int, from_status: ?string, to_status: string, author: ?array{id: int, name: string}, created_at: string}>,
+     *     messages?: list<array{id: int, body: string, author: array{id: int, name: string}, role: ?string, created_at: string}>
      * }
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
@@ -46,5 +51,14 @@ final readonly class ServiceRequestData
                 $this->statusHistories,
             ),
         ];
+
+        if ($this->messages !== []) {
+            $data['messages'] = array_map(
+                fn (RequestMessageData $message): array => $message->toArray(),
+                $this->messages,
+            );
+        }
+
+        return $data;
     }
 }

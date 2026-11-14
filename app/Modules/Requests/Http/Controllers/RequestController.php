@@ -7,6 +7,7 @@ namespace App\Modules\Requests\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Communities\Models\Community;
 use App\Modules\Requests\Actions\CreateRequest;
+use App\Modules\Requests\Actions\FindCommunityRequest;
 use App\Modules\Requests\Actions\ListRequests;
 use App\Modules\Requests\Actions\ShowRequest;
 use App\Modules\Requests\Data\ServiceRequestListItemData;
@@ -91,12 +92,24 @@ final class RequestController extends Controller
         Community $community,
         string $request,
         ShowRequest $showRequest,
+        FindCommunityRequest $findCommunityRequest,
+        Gate $gate,
+        UrlGenerator $urls,
         ResponseFactory $inertia,
     ): Response {
         $serviceRequest = $showRequest->handle($httpRequest->user(), $request);
+        $requestModel = $findCommunityRequest->handle($request);
+        $messageStoreUrl = $gate->allows('addMessage', $requestModel)
+            ? $urls->route('communities.requests.messages.store', [
+                'community' => $community->slug,
+                'request' => $requestModel->id,
+            ])
+            :
+            null;
 
         return $inertia->render('Requests/Show', [
             'serviceRequest' => fn (): array => $serviceRequest->toArray(),
+            'messageStoreUrl' => $inertia->always($messageStoreUrl),
         ]);
     }
 }

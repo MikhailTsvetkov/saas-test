@@ -80,6 +80,14 @@ export interface RequestStatusHistory {
     created_at: string;
 }
 
+export interface RequestMessage {
+    id: number;
+    body: string;
+    author: RequestAuthor;
+    role: 'resident' | 'manager' | null;
+    created_at: string;
+}
+
 export interface ServiceRequest {
     id: number;
     title: string;
@@ -90,4 +98,5 @@ export interface ServiceRequest {
     updated_at: string;
     resolved_at: string | null;
     statusHistories: RequestStatusHistory[];
+    messages?: RequestMessage[];
 }

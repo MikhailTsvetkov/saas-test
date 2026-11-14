@@ -108,6 +108,31 @@ final class RequestShowTest extends TestCase
         ]))->assertForbidden();
     }
 
+    public function test_manager_can_post_a_message_to_a_request_in_the_current_community(): void
+    {
+        $serviceRequest = ServiceRequest::factory()->create();
+        $member = CommunityMember::factory()
+            ->for($serviceRequest->community)
+            ->manager()
+            ->create();
+
+        $this->actingAs($member->user)
+            ->post(route('communities.requests.messages.store', [
+                'community' => $serviceRequest->community->slug,
+                'request' => $serviceRequest->id,
+            ]), ['body' => '  Комментарий управляющего  '])
+            ->assertRedirect(route('communities.requests.show', [
+                'community' => $serviceRequest->community->slug,
+                'request' => $serviceRequest->id,
+            ]));
+
+        $this->assertDatabaseHas('request_messages', [
+            'service_request_id' => $serviceRequest->id,
+            'user_id' => $member->user_id,
+            'body' => 'Комментарий управляющего',
+        ]);
+    }
+
     public function test_direct_show_action_still_checks_authorization(): void
     {
         $serviceRequest = ServiceRequest::factory()->create();
