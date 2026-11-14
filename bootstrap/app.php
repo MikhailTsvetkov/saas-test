@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withEvents(discover: [__DIR__.'/../app/Modules/Requests/Listeners'])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn (): string => route('login'));
         $middleware->redirectUsersTo(fn (): string => route('home'));

@@ -7,6 +7,7 @@ namespace App\Modules\Requests\Actions;
 use App\Modules\Communities\CurrentCommunity;
 use App\Modules\Identity\Models\User;
 use App\Modules\Requests\Enums\RequestStatus;
+use App\Modules\Requests\Events\RequestCreated;
 use App\Modules\Requests\Models\ServiceRequest;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\ConnectionInterface;
@@ -47,6 +48,8 @@ final readonly class CreateRequest
                 'from_status' => null,
                 'to_status' => RequestStatus::New,
             ]);
+
+            RequestCreated::dispatch($serviceRequest);
 
             return $serviceRequest;
         });
