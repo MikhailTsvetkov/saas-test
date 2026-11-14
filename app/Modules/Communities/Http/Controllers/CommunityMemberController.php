@@ -6,6 +6,7 @@ namespace App\Modules\Communities\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Communities\Actions\ListCommunityMembers;
+use App\Modules\Communities\Data\CommunityMemberData;
 use App\Modules\Communities\Models\Community;
 use Inertia\Response;
 use Inertia\ResponseFactory;
@@ -18,7 +19,10 @@ final class CommunityMemberController extends Controller
         ResponseFactory $inertia,
     ): Response {
         return $inertia->render('Communities/Members', [
-            'members' => fn (): array => $members->handle(),
+            'members' => fn (): array => array_map(
+                fn (CommunityMemberData $member): array => $member->toArray(),
+                $members->handle(),
+            ),
         ]);
     }
 }
