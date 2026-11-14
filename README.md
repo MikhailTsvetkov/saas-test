@@ -179,17 +179,43 @@ id/name/slug/role. На login и списке сообществ `community` р�
 Контекст, текущий пользователь и ссылки обновляются также при частичных
 запросах Inertia. Скрытая ссылка не заменяет серверную авторизацию.
 
-### Будущий модуль Requests
+### Модуль Requests
 
-Модуль обращений пока не создан. Его действия должны получать
-`App\Modules\Communities\CurrentCommunity` через конструктор DI и использовать
-`$currentCommunity->community()->id` для ограничения всех выборок и назначения
-community при создании записи. HTTP-маршруты должны проходить `auth` и
-`community` middleware. Обращение следует искать внутри текущего сообщества
-(чужой id — 404), а право на конкретную операцию проверять отдельной policy.
-Нельзя получать обращение глобальным `find($id)` или доверять tenant/role из
-тела запроса. Вызов контекста до его установки приводит к `LogicException`;
-в очереди или CLI HTTP-контекст сам по себе отсутствует.
+Модуль обращений реализован и работает в рамках текущего сообщества.
+Все действия проходят через `auth` + `community` middleware, при этом
+`CurrentCommunity` используется как источник tenant-контекста, а все запросы
+к `service_requests` ограничены текущим сообществом и ролями пользователя.
+
+Основные маршруты:
+
+| Маршрут | Доступ |
+| --- | --- |
+| `GET /communities/{community:slug}/requests` | любой участник, с фильтрацией по своему tenant |
+| `GET /communities/{community:slug}/requests/create` | только resident |
+| `POST /communities/{community:slug}/requests` | только resident |
+| `GET /communities/{community:slug}/requests/{request}` | участник сообщества, видит свой или все обращения для manager |
+| `POST /communities/{community:slug}/requests/{request}/messages` | resident или manager, если может просматривать обращение |
+| `PATCH /communities/{community:slug}/requests/{request}/status` | только manager текущего сообщества |
+
+Логика модуля:
+
+- статус обращения хранится в enum `RequestStatus` и допускает только переходы `new -> in_progress`, `new -> resolved`, `in_progress -> resolved`, `resolved -> in_progress`;
+- при создании записи сервер автоматически создаёт первую историю `null -> new` и не принимает `community_id`, `user_id`, `status` и `resolved_at` из запроса;
+- комментарии обновляют `updated_at` родительского обращения, но не меняют статус;
+- `resolved_at` выставляется при переходе в `resolved` и сбрасывается при повторном открытии;
+- все изменения статуса и истории проходят в одной транзакции с повторной проверкой допустимого перехода после блокировки строки.
+
+Демонстрационные данные создаются через `RequestDemoSeeder`: в двух сообществах есть шесть обращений, история и комментарии согласованы с ролями жителей и управляющих. Повторный запуск seed не дублирует записи и не сбрасывает существующий статус.
+
+Проверки выполняются через:
+
+```bash
+./x artisan test --compact tests/Feature/Requests
+./x artisan test --compact tests/Feature/Database
+./x composer exec -- pint --dirty --format agent
+./x npm run typecheck
+./x npm run build
+```
 
 ---
 
