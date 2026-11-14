@@ -28,13 +28,14 @@ final class DemoSeederTest extends TestCase
         config(['inertia.ssr.enabled' => false]);
     }
 
-    public function test_seeder_creates_two_communities_five_users_and_six_memberships(): void
+    public function test_seeder_creates_two_communities_five_users_six_memberships_and_six_demo_requests(): void
     {
         $this->seed(DatabaseSeeder::class);
 
         $this->assertDatabaseCount('communities', 2);
         $this->assertDatabaseCount('users', 5);
         $this->assertDatabaseCount('community_members', 6);
+        $this->assertDatabaseCount('service_requests', 6);
         $this->assertDatabaseHas('communities', [
             'slug' => 'sosnovy',
             'name' => 'ЖК Сосновый',
@@ -54,7 +55,8 @@ final class DemoSeederTest extends TestCase
             ['lesnoy', 'multi@example.test', CommunityRole::Manager],
         ] as [$slug, $email, $role]) {
             $membership = $memberships->first(
-                fn (CommunityMember $member): bool => $member->community->slug === $slug && $member->user->email === $email,
+                fn (CommunityMember $member): bool =>
+                    $member->community->slug === $slug && $member->user->email === $email,
             );
             $this->assertNotNull($membership);
             $this->assertSame($role, $membership->role);
@@ -65,6 +67,31 @@ final class DemoSeederTest extends TestCase
             $this->assertNotSame('DemoPassword123!', $user->password);
             $this->assertTrue($hasher->check('DemoPassword123!', $user->password));
         }
+
+        $this->assertDatabaseHas('service_requests', [
+            'title' => 'Не работает освещение в подъезде',
+            'status' => 'new',
+        ]);
+        $this->assertDatabaseHas('service_requests', [
+            'title' => 'Протечка трубы в подвале',
+            'status' => 'in_progress',
+        ]);
+        $this->assertDatabaseHas('service_requests', [
+            'title' => 'Сломан домофон',
+            'status' => 'resolved',
+        ]);
+        $this->assertDatabaseHas('service_requests', [
+            'title' => 'Не работает уличный фонарь',
+            'status' => 'new',
+        ]);
+        $this->assertDatabaseHas('service_requests', [
+            'title' => 'Повреждено дорожное покрытие',
+            'status' => 'in_progress',
+        ]);
+        $this->assertDatabaseHas('service_requests', [
+            'title' => 'Не открывается калитка',
+            'status' => 'resolved',
+        ]);
     }
 
     public function test_repeated_seeding_preserves_records_ids_password_hashes_and_timestamps(): void
@@ -121,9 +148,13 @@ final class DemoSeederTest extends TestCase
     public function test_repeated_seeding_restores_demo_community_details_and_roles(): void
     {
         $this->seed(DatabaseSeeder::class);
-        $community = Community::query()->where('slug', 'sosnovy')->firstOrFail();
+        $community = Community::query()
+            ->where('slug', 'sosnovy')
+            ->firstOrFail();
         $originalDescription = $community->description;
-        $user = User::query()->where('email', 'manager1@example.test')->firstOrFail();
+        $user = User::query()
+            ->where('email', 'manager1@example.test')
+            ->firstOrFail();
         $membership = $community->communityMembers()->whereBelongsTo($user)->firstOrFail();
         $community->update(['name' => 'Изменённое имя', 'description' => null]);
         $membership->update(['role' => CommunityRole::Resident]);
@@ -158,14 +189,17 @@ final class DemoSeederTest extends TestCase
             'password' => 'DemoPassword123!',
         ])->assertRedirectToRoute('home')->assertSessionHasNoErrors();
 
-        $this->assertAuthenticatedAs(User::query()->where('email', $email)->firstOrFail());
+        $this->assertAuthenticatedAs(
+            User::query()->where('email', $email)->firstOrFail(),
+        );
         $this->get(route('home'))->assertRedirectToRoute('communities.index');
         $this->get(route('communities.index'))->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Communities/Index')
                 ->where('auth.user.email', $email)
                 ->where('community', null)
-                ->where('communities', fn (Collection $communities): bool => $communities->pluck('slug')->all() === $slugs
+                ->where('communities', fn (Collection $communities): bool =>
+                    $communities->pluck('slug')->all() === $slugs
                     && $communities->pluck('role')->all() === $roles));
     }
 
@@ -177,32 +211,54 @@ final class DemoSeederTest extends TestCase
             'password' => 'DemoPassword123!',
         ])->assertRedirectToRoute('home');
 
-        $this->get(route('communities.dashboard', 'sosnovy'))
+        $this->get(route(
+            'communities.dashboard',
+            'sosnovy',
+        ))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('community.role', 'resident')
                 ->where('urls.members', null));
-        $this->get(route('communities.members', 'sosnovy'))
+        $this->get(route(
+            'communities.members',
+            'sosnovy',
+        ))
             ->assertForbidden();
-        $this->get(route('communities.dashboard', 'lesnoy'))
+        $this->get(route(
+            'communities.dashboard',
+            'lesnoy',
+        ))
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->where('community.role', 'manager'));
-        $this->get(route('communities.members', 'lesnoy'))
+            ->assertInertia(fn (Assert $page) =>
+                $page->where('community.role', 'manager'));
+        $this->get(route(
+            'communities.members',
+            'lesnoy',
+        ))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('community.slug', 'lesnoy')
-                ->where('members', fn (Collection $members): bool => $members->pluck('email')->sort()->values()->all() === [
-                    'manager2@example.test', 'multi@example.test', 'resident2@example.test',
-                ]));
+                ->where('members', fn (Collection $members): bool =>
+                    $members->pluck('email')->sort()->values()->all() === [
+                        'manager2@example.test',
+                        'multi@example.test',
+                        'resident2@example.test',
+                    ]));
 
         $this->post(route('logout'))
             ->assertRedirectToRoute('login');
         $this->assertGuest();
         $this->get(route('communities.index'))
             ->assertRedirectToRoute('login');
-        $this->get(route('communities.dashboard', 'lesnoy'))
+        $this->get(route(
+            'communities.dashboard',
+            'lesnoy',
+        ))
             ->assertRedirectToRoute('login');
-        $this->get(route('communities.members', 'lesnoy'))
+        $this->get(route(
+            'communities.members',
+            'lesnoy',
+        ))
             ->assertRedirectToRoute('login');
     }
 }

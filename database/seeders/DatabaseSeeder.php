@@ -65,6 +65,8 @@ final class DatabaseSeeder extends Seeder
                     );
                 }
             }
+
+            $this->call(RequestDemoSeeder::class);
         });
     }
 }
